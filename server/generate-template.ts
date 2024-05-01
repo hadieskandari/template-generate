@@ -4,19 +4,21 @@ const fs = require("fs");
 const path = require("path");
 
 const spinner = ora("Executing file...").start();
+const args = process.argv.slice(2);
 
 const configTemplate: TemplateInstruct = {
     id: 1,
-    name: "Simple Page",
+    name: "Mehsini",
     description: "Vue template for a simple page",
     components: [
-        {
-            component: "simple-header",
-        },
         {
             component: "product",
             margin: "1rem 0",
             padding: "0 2rem",
+        },
+        {
+            component: "simple-header",
+            margin: "1rem 0",
         },
         {
             component: "product-2",
@@ -41,7 +43,6 @@ import "../colors.css"
 </script>
 
 <style scoped>
-  /* Your Vue styles here */
 </style>
 `;
 
@@ -59,45 +60,44 @@ fs.writeFile(filePath, vueTemplate, function (err: any) {
     spinner.succeed("Vue template created!");
 });
 
-//run shell command
-const exec = require("child_process").exec;
-const command = "pnpm build";
+if (!args.includes("--no-build")) {
+    const exec = require("child_process").exec;
+    const command = "pnpm build";
 
-spinner.stop();
+    process.env.BUILD_DIR = `.nuxt-${configTemplate.name.toLowerCase()}-${new Date()
+        .toISOString()
+        .replace(/[^0-9]/g, "")
+        .slice(0, 14)}`;
 
-function execBuildPhase() {
-    return new Promise<void>((resolve, reject) => {
-        const buildSpinner = ora("Starting build...").start();
-        const buildCommand = "pnpm build";
-        exec(buildCommand, function (error: any, stdout: any, stderr: any) {
-            if (error) {
-                buildSpinner.fail(`exec error: ${error}`);
-                reject(error);
-                return;
-            }
-            buildSpinner.succeed("Build completed");
-            console.log(`stdout: ${stdout}`);
-            resolve();
+    spinner.info(`Building path set to => ${process.env.BUILD_DIR}`);
+
+    spinner.stop();
+    function execBuildPhase() {
+        return new Promise<void>((resolve, reject) => {
+            const buildSpinner = ora("Starting build...").start();
+            const buildCommand = "pnpm build";
+            exec(buildCommand, function (error: any, stdout: any, stderr: any) {
+                if (error) {
+                    buildSpinner.fail(`exec error: ${error}`);
+                    reject(error);
+                    return;
+                }
+                buildSpinner.succeed("Build completed");
+                console.log(`stdout: ${stdout}`);
+                resolve();
+            });
         });
-    });
-}
+    }
 
-function execPreviewPhase() {
-    const previewSpinner = ora("Starting preview...").start();
-    const previewCommand = "pnpm preview";
-    exec(previewCommand, function (error: any, stdout: any, stderr: any) {
-        if (error) return previewSpinner.fail(`exec error: ${error}`);
-        previewSpinner.succeed("Preview started");
-        console.log(`stdout: ${stdout}`);
-    });
+    execBuildPhase()
+        .then(() => {
+            const successSpinner = ora("Build completed").start();
+            successSpinner.succeed();
+            successSpinner.stop();
+        })
+        .catch((error) => {
+            const errorSpinner = ora("An error occurred").start();
+            errorSpinner.fail(error);
+            errorSpinner.stop();
+        });
 }
-
-execBuildPhase()
-    .then(() => {
-        execPreviewPhase();
-    })
-    .catch((error) => {
-        const errorSpinner = ora("An error occurred").start();
-        errorSpinner.fail(error);
-        errorSpinner.stop();
-    });

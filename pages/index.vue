@@ -1,15 +1,15 @@
 <template>
-  <div>
-  <simple-header style="margin:undefined;padding:undefined"/>
-<product style="margin:1rem 0;padding:0 2rem"/>
-<product-2 style="margin:1rem 0;padding:0 2rem"/>
-  </div>
+    <div>
+        <ProductSingleRow style="margin:1rem 0;padding:0 2rem" />
+        <product-two-row style="margin:1rem 0;padding:0 2rem" />
+    </div>
 </template>
 
 <script setup>
+import ProductSingleRow from "../components/productSingleRow.vue"
 import "../colors.css"
 </script>
 
 <style scoped>
-  /* Your Vue styles here */
+/* @import "../colors.css"; */
 </style>

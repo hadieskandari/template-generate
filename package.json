@@ -15,5 +15,8 @@
         "ora": "^8.0.1",
         "vue": "^3.4.21",
         "vue-router": "^4.3.0"
+    },
+    "devDependencies": {
+        "vue-tsc": "^1.8.27"
     }
 }
